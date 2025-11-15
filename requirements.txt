@@ -1,0 +1,8 @@
+librosa
+soundfile
+numpy
+matplotlib
+scipy
+pandas
+tqdm
+python-dotenv

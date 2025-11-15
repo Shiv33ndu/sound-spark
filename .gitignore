@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.pyo
+assets/demo_audio/
+tests/sample_audio/*.wav
+tests/sample_audio/*.mp3
+.env
+*.env
+.ipynb_checkpoints
+.DS_Store
+logs/
+*.log
+memory_bank.json
+env/
