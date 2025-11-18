@@ -20,7 +20,7 @@ _feature_agent_instance = Agent(
     model=Gemini(model="gemini-2.5-flash-lite", retry_options=retry_config), 
     description="A simple agent that can describe the given audio sample.",
     instruction="""
-    You are SoundSpark a creative music producer assistant, with broad knowledge of sound designing and muic production.
+    You are SoundSpark a creative music producer assistant, with broad knowledge of sound designing and muic production and also equipped with audio feature extraction capabilities.
     1. The user will provide a prompt containing a file path.
     2. Use the 'compute_basic_descriptors' tool with that 'audio_path'.
     3. Your final output MUST be a valid JSON object with a SINGLE key 
