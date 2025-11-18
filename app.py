@@ -11,10 +11,10 @@ from dotenv import load_dotenv
 import warnings
 from pathlib import Path
 
-from utils.text_from_resp import extract_human_text
 from utils.run_sessions import run_session, run_session_return
 from utils.check_prompt import has_audio_path
-from debug import verbose_debug_events
+from utils.jsonfy import give_json
+
 
 # This will ignore all warning messages
 warnings.filterwarnings('ignore')
@@ -50,9 +50,11 @@ async def run_workflow(prompt: str):
         
         resp = await run_session_return(runner_2, prompt, "test_session_01", "user_01")
 
-        ok = handle_llm_tool_call(resp, sample, f"tests/synthesis_demo/{Path(sample).stem}_layered.mp3")
+        # TODO: Add give json
+        print()
+        # ok = handle_llm_tool_call(resp, sample, f"tests/synthesis_demo/{Path(sample).stem}_layered.mp3")
         
-        print(ok)
+        # print(ok)
         
         # adding the session to long term memory
         print("\n[app]: Adding the session to long term memory")
