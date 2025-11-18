@@ -39,9 +39,9 @@ def compute_basic_descriptors(path: str, sr: int = 22050) -> Dict[str, Any]:
     # tempo (may be scalar or array-like)
     try:
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
-        print(f"[feature extractor] : The tempo = {tempo}")
+        # print(f"[feature extractor] : The tempo = {tempo}")
         changed_tempo = _to_scalar(tempo)
-        print(f"[feature extractor] : Changed The tempo = {changed_tempo}")
+        # print(f"[feature extractor] : Changed The tempo = {changed_tempo}")
         # ensure tempo is float (or None)
         if tempo is not None:
             try:
@@ -57,11 +57,41 @@ def compute_basic_descriptors(path: str, sr: int = 22050) -> Dict[str, Any]:
     zcr = _to_scalar(np.mean(librosa.feature.zero_crossing_rate(y)))
     rms = _to_scalar(np.mean(librosa.feature.rms(y=y)))
 
+    # Harmonic and Percussive Energy
+    # First, separate the audio into harmonic and percussive components
+    y_harmonic, y_percussive = librosa.effects.hpss(y)
+    
+    # Calculate the mean RMS energy for each component
+    harmonic_energy = _to_scalar(np.mean(librosa.feature.rms(y=y_harmonic)))
+    percussive_energy = _to_scalar(np.mean(librosa.feature.rms(y=y_percussive)))
+
+    # print(f"harmonic_energy: {harmonic_energy, type(harmonic_energy)}\n percussive_energy: {percussive_energy, type(percussive_energy)}")
+    
+    # --- Pitch Feature ---
+    
+    # 8. Estimated Pitch
+    # We use pyin (probabilistic YIN) to estimate the fundamental frequency (F0)
+    # This returns f0 (pitch), voiced_flag, and voiced_probs
+    f0, _, _ = librosa.pyin(
+        y, 
+        fmin=librosa.note_to_hz('C2'), 
+        fmax=librosa.note_to_hz('C7')
+    )
+    
+    # f0 contains NaN for unvoiced frames. We use np.nanmean
+    # to calculate the average pitch, *ignoring* the unvoiced frames.
+    estimated_pitch = _to_scalar(np.nanmean(f0))
+
+    # print(f"estimated pitch : {estimated_pitch}")
+
     return {
         "duration": duration,
         "tempo": changed_tempo,
         "spectral_centroid": spec_cent,
         "spectral_bandwidth": spec_bw,
         "zero_crossing_rate": zcr,
-        "rms": rms
+        "rms": rms,
+        "harmonic_energy": harmonic_energy,
+        "percussive_energy": percussive_energy,
+        "estimated_pitch_hz": estimated_pitch if not np.isnan(estimated_pitch) else 0.0,
     }

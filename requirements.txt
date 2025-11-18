@@ -6,3 +6,10 @@ scipy
 pandas
 tqdm
 python-dotenv
+
+#adk and kaggle env libs
+# google-adk==1.18.0
+# google-generativeai==0.8.5
+# mcp==1.20.0
+# ipython==7.34.0
+# google-cloud-aiplatform==1.125.0
