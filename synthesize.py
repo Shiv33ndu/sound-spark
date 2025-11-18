@@ -10,27 +10,86 @@ from typing import Dict, Any
 
 
 # tool consume LLM output for synthesizing the audio
-def handle_llm_tool_call(llm_json_text: str, file_path: str, out_path: str) -> Dict[str, Any]:
-    """
-    This function takes the LLM Response (assumes its JSON STRING)
-    extracts function and args key out of it 
-    calls execute_tool that does extra validation on the instructions part of the LLM response
-    down the pipeline apply_patch fn gets called to create a synthesized sound and store it into local dir
 
-    arg:
-        llm_json_text : JSON String that has all the suggestions and instructions to build the patch
-        file_path: uploaded file's path
-        out_path: syntesized file's path
-    return:
-        JSON 
+# def handle_llm_tool_call(llm_json_text: str, file_path: str, out_path: str) -> Dict[str, Any]:
+#     """
+#     This function takes the LLM Response (assumes its JSON STRING)
+#     extracts function and args key out of it 
+#     calls execute_tool that does extra validation on the instructions part of the LLM response
+#     down the pipeline apply_patch fn gets called to create a synthesized sound and store it into local dir
+
+#     arg:
+#         llm_json_text : JSON String that has all the suggestions and instructions to build the patch
+#         file_path: uploaded file's path
+#         out_path: syntesized file's path
+#     return:
+#         JSON 
+#     """
+#     call = json.loads(llm_json_text)
+#     if call.get("tool") != "synthesis_tool":
+#         return {"ok": False, "error": "unsupported tool"}
+#     func = call.get("function")
+#     args = call.get("args", {})
+#     resp = execute_tool(func, args, file_path, out_path)
+#     return resp
+
+def handle_llm_tool_call(
+    llm_json: Any, 
+    file_path: str, 
+    out_path: str
+) -> Dict[str, Any]:
     """
-    call = json.loads(llm_json_text)
+    Accepts either:
+    - a dict representing the LLM tool call
+    - a JSON string containing the tool call
+
+    file_path  -> absolute/relative path of uploaded input audio
+    out_path   -> desired output synthesized file path
+
+    Injects these into args, overrides the LLM output path, 
+    and calls execute_tool to run apply_patch.
+    """
+
+    # 1. Parse safely if llm_json is a string
+    if isinstance(llm_json, str):
+        llm_json = llm_json.strip()
+        if not llm_json:
+            return {"ok": False, "error": "Empty LLM response string"}
+        try:
+            call = json.loads(llm_json)
+        except Exception as e:
+            return {"ok": False, "error": f"Failed to parse LLM JSON string: {e}"}
+    # 2. Accept dict directly
+    elif isinstance(llm_json, dict):
+        call = llm_json
+    else:
+        return {"ok": False, "error": f"Unexpected LLM response type: {type(llm_json)}"}
+
+    # 3. Validate tool
     if call.get("tool") != "synthesis_tool":
-        return {"ok": False, "error": "unsupported tool"}
+        return {"ok": False, "error": f"Unsupported tool: {call.get('tool')}"}
+
     func = call.get("function")
+    if not func:
+        return {"ok": False, "error": "Missing 'function' field in LLM output"}
+
+    # 4. Extract args
     args = call.get("args", {})
-    resp = execute_tool(func, args, file_path, out_path)
-    return resp
+    if not isinstance(args, dict):
+        return {"ok": False, "error": "'args' must be a dict"}
+
+    # 5. Override paths (so agent cannot write anywhere else)
+    args["input_audio_path"] = file_path
+    args["out_path"] = out_path  # forced override for safety
+
+    # 6. Call your tool executor
+    try:
+        resp = execute_tool(func, args, file_path, out_path)
+        return resp
+    except Exception as e:
+        return {"ok": False, "error": f"execute_tool raised: {e}"}
+
+
 
 
 synth_agent = LlmAgent(
