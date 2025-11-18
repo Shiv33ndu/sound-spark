@@ -23,7 +23,7 @@ load_dotenv()
 
 print("[app]: env secrets loaded!")
 
-sample = "tests/sample_audio/gritty_bass.wav"
+sample = "tests/sample_audio/pluck.wav"
 
 
 async def run_workflow(prompt: str):
@@ -98,6 +98,6 @@ async def run_workflow(prompt: str):
 if __name__ == "__main__":
     # Get a real file path for testing
     # Note: Replace with a real audio file path on your system
-    user_prompt = f"what sounds to layer with this audio {sample}"  # what sounds to layer with this audio {sample}
+    user_prompt = f"Add a long stereo delay to this audio {sample}"  # what sounds to layer with this audio {sample}
 
     asyncio.run(run_workflow(user_prompt))
