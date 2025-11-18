@@ -50,11 +50,11 @@ async def run_workflow(prompt: str):
         
         resp = await run_session_return(runner_2, prompt, "test_session_01", "user_01")
 
-        # TODO: Add give json
-        print()
-        # ok = handle_llm_tool_call(resp, sample, f"tests/synthesis_demo/{Path(sample).stem}_layered.mp3")
+        resp = give_json(resp)
+
+        ok = handle_llm_tool_call(resp, sample, f"tests/synthesis_demo/{Path(sample).stem}_layered.mp3")
         
-        # print(ok)
+        print(ok)
         
         # adding the session to long term memory
         print("\n[app]: Adding the session to long term memory")
@@ -66,19 +66,19 @@ async def run_workflow(prompt: str):
 
         print("[app]: Memory Saved!\n\n")
 
-        mem = await memory_service.search_memory(app_name=runner.app_name, user_id="user_01", query="What sound we used")
+        # mem = await memory_service.search_memory(app_name=runner.app_name, user_id="user_01", query="What sound we used")
         
-        for memory in mem.memories:
-            if memory.content and memory.content.parts:
-                text = memory.content.parts[0].text[:80]
-                print(f"  [{memory.author}]: {text}...")
+        # for memory in mem.memories:
+        #     if memory.content and memory.content.parts:
+        #         text = memory.content.parts[0].text[:80]
+        #         print(f"  [{memory.author}]: {text}...")
 
-        mem2 = await memory_service.search_memory(app_name=runner_2.app_name, user_id="user_01", query="What sound synthesis")
+        # mem2 = await memory_service.search_memory(app_name=runner_2.app_name, user_id="user_01", query="What sound synthesis")
         
-        for memory in mem2.memories:
-            if memory.content and memory.content.parts:
-                text = memory.content.parts[0].text[:80]
-                print(f"  [{memory.author}]: {text}...")
+        # for memory in mem2.memories:
+        #     if memory.content and memory.content.parts:
+        #         text = memory.content.parts[0].text[:80]
+        #         print(f"  [{memory.author}]: {text}...")
 
     else:
         runner = Runner(app=chat_app, session_service=session_service, memory_service=memory_service)

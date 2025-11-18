@@ -2,6 +2,15 @@ import json
 import re
 
 def give_json(res: str):
+    """
+    A utility to structure the text false JSON string from LLMs to JSON String
+    This eliminates any texts or words out side of the JSON string parantheses 
+
+    args:
+        res : string, LLMs faulty response
+    return
+        JSON Strnig Dict in Python 
+    """
     # Use a regex to extract the content between the first { and the last }
     json_match = re.search(r'\{.*\}', res, re.DOTALL)
     
